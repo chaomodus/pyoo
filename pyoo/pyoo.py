@@ -5,10 +5,10 @@ import fnmatch
 
 prepositions = ('with/using',
                 'at/to',
-                'in front of',
+                # 'in front of',
                 'in/inside/into',
-                'on top of/on/onto/upon',
-                'out of/from inside/from',
+                # 'on top of/on/onto/upon',
+                # 'out of/from inside/from',
                 'over',
                 'through',
                 'under/underneath/beneath',
@@ -17,7 +17,8 @@ prepositions = ('with/using',
                 'for/about',
                 'is',
                 'as',
-                'off/off of')
+                'off')
+                #'off/off of')
 
 normalized_preps = tuple([x.split('/') for x in prepositions])
 
@@ -59,6 +60,7 @@ class Thing(object):
         self.names = tuple(names)
         self.description = description
         self.location = None
+        self.interpreter = None
 
     def verbs(self):
         """Return a list of bound methods which denote themselves as verbs."""
@@ -95,6 +97,9 @@ class Thing(object):
                 verbglobs.append((globstr, tuple(combo), verb, self))
         return verbglobs
 
+    def handle_move(self, newlocation):
+        self.location = newlocation
+
     def __repr__(self):
         return "<Thing '%s' object at 0x%x>" % (self.name, self.__hash__())
 
@@ -109,11 +114,13 @@ class Container(Thing):
 class Place(Container):
     def __init__(self, names, description=''):
         Container.__init__(self, names, description)
-        self.ways = list()
+        self.ways = dict()
 
-    @verb('go,n,w,s,e,u,d,in,out','none','none','none')
+    @verb('n,w,s,e,nw,sw,ne,se,u,d,in,out','none','none','none')
     def go(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
-        pass
+        if self.interpreter:
+            if self.ways.has_key(verbname):
+                self.interpreter.handle_move(self.ways[verbname])
 
     def __repr__(self):
         return "<Place '%s' object at 0x%x>" % (self.name, self.__hash__())
@@ -194,7 +201,11 @@ class Pyoo(object):
         return [x for x in self.namecache if fnmatch.fnmatch(name, x[0])]
 
     def handle_move(self, newroom):
-        pass
+        self.room = newroom
+        if self.player:
+            try:
+                self.player.handle_move(newroom)
+            except: pass
 
     def handle_get(self, thing):
         pass
