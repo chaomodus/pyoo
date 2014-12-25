@@ -1,3 +1,5 @@
 """PYOO: A python MOO-like verb based text adventure engine."""
 
-from .pyoo import Pyoo, Thing, Container, Place, Player, PyooError, PyooVerbNotFound, prepositions, verb
+from .interpret import Interpreter, PyooError, PyooVerbNotFound
+from .base import verb, prepositions, normalized_preps
+from .things import Thing, Container, Place, Player

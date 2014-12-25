@@ -1,5 +1,5 @@
 import pyoo
-from pyoo import Thing, verb, Pyoo, Container, Place, Player, PyooVerbNotFound
+from pyoo import Thing, verb, Interpreter, Container, Place, Player, PyooVerbNotFound
 
 class Hammer(Thing):
     def __init__(self):
@@ -54,7 +54,7 @@ class HammerTime(Place):
             print "That doesn't appear to be here."
 
 hammertime = HammerTime()
-game = Pyoo([], Player(), [hammertime,], hammertime)
+game = Interpreter([], Player(), [hammertime,], hammertime)
 run = True
 
 if __name__ == '__main__':
