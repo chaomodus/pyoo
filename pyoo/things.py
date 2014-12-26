@@ -73,14 +73,21 @@ class Place(Container):
     # this verb expects to be annotated from update_go. We never want it ot be at the top of a match list by its deault name either
     @verb('#go','none','none','none')
     def go(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
+        self.do_go(verbname)
+
+    @verb('go,move,walk,run', 'any','none','none')
+    def go_dir(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
+        self.do_go(dobjstr)
+
+    def do_go(self, direction):
         if self.interpreter:
-            if self.ways.has_key(verbname):
-                self.interpreter.handle_move(self.ways[verbname])
+            if self.ways.has_key(direction):
+                self.interpreter.handle_move(self.ways[direction])
 
     def update_go(self):
         # note does no actually remove items from the go verb in case the descender is overloading.
         # also note, the interpreter needs to have update() called after this is called.
-        for direction in ways:
+        for direction in self.ways:
             if not direction in self.go.names:
                 self.go.names.append(direction)
 

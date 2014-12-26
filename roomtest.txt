@@ -1,0 +1,40 @@
+Porch
+This is a small, fairly nondescript porch covered on two sides with a neck-high fence. It is made of old boards nailed down instead of screwed.
+
+To the north is the front door, slightly ajar.
+.
+n,north Play Room
+.
+Play Room
+This is a medium-sized room with light wood parcade floor. There are toys of every description strewn about willy-nilly, two large baskets of stuffed animals and various tables adorned with books and drawing supplies. Large south-facing windows stream bright winter sunlight, warming the room.
+
+To the south is the front door. To the east the room empties into the living room, to the north it continues into the hallway.
+.
+s,south Porch
+n,north Hallway
+e,east Living Room
+.
+Hallway
+This is a narrow wood-floored hallway, echoing with every sound.
+
+Several doors connect to the hallway, all closed. It also contiues to the south into the play room, and east into the kitchen.
+.
+s,south Play Room
+e,east Kitchen
+.
+Kitchen
+This is a small linolium-floored kitchen, with red counters, a double stainless steel sink filled with dishes and a noisy refridgerator. It is illuminated from above by recessed flourescent lights, although only one bulb seems to be working.
+
+The room contiues to the south into the living room, and to the west into the hallway.
+.
+s,south Living Room
+w,west Hallway
+.
+Living Room
+This small intimate livingroom with light wood parkade flooring is dominated by a large wampa rug on the floor and a TV opposite a three seat red couch. A window to the south has the shades draw for enhanced viewing.
+
+The room continues to the west past the couch into the play room, and to the north into the kitchen.
+.
+w,west Play Room
+n,north Kitchen
+.

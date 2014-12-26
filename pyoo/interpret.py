@@ -55,12 +55,19 @@ class Interpreter(object):
 
         self.update_namecache()
         self.update_commandcache()
+        self.update_placecache()
 
     def update_namecache(self):
         self.namecache = list()
         for obj in self.contents:
             for name in obj.names:
                 self.namecache.append((name, obj))
+
+    def update_placecache(self):
+        self.placecache = list()
+        for obj in self.rooms:
+            for name in obj.names:
+                self.placecache.append((name, obj))
 
     def update_commandcache(self):
         self.commandcache = list()
@@ -80,18 +87,17 @@ class Interpreter(object):
     def get_namematches(self, name):
         return [x for x in self.namecache if fnmatch.fnmatch(name, x[0])]
 
+    def get_placematches(self, name):
+        return [x for x in self.placecache if fnmatch.fnmatch(name, x[0])]
+
     def handle_move(self, newroom):
         self.room = newroom
         if self.player:
-            try:
-                self.player.handle_move(newroom)
-            except: pass
+            self.player.handle_move(newroom)
 
-        try:
-            self.room.handle_enter(player)
-        except:
-            pass
+        self.room.handle_enter(self.player)
 
+        self.update()
 
     def handle_get(self, thing):
         pass
