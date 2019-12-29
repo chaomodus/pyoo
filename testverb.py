@@ -1,36 +1,39 @@
-import pyoo
-from pyoo import Thing, verb, Interpreter, Container, Place, Player, PyooVerbNotFound
+from pyoo.interpret import Interpreter, PyooVerbNotFound
+from pyoo.things import Thing, Place, Player
+from pyoo.base import verb
 
 class Hammer(Thing):
     def __init__(self):
-        Thing.__init__(self, 'hammer','a heavy ball-peen hammer.')
+        Thing.__init__(self, "hammer", "a heavy ball-peen hammer.")
 
-    @verb('hit','that','with','this')
+    @verb("hit", "that", "with", "this")
     def hit(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
         try:
             dobj.handle_hit(self)
-        except:
+        except Exception:
             pass
 
-    @verb('drop','this','none','none')
+    @verb("drop", "this", "none", "none")
     def drop(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
-        print verbname, dobjstr, prepstr, iobjstr, dobj, iobj
+        print(verbname, dobjstr, prepstr, iobjstr, dobj, iobj)
 
-    @verb('get','this','none','none')
+    @verb("get", "this", "none", "none")
     def get(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
-        print verbname, dobjstr, prepstr, iobjstr, dobj, iobj
+        print(verbname, dobjstr, prepstr, iobjstr, dobj, iobj)
+
 
 class Nail(Thing):
     def __init__(self):
-        Thing.__init__(self, 'nail','a nine inch nail.')
+        Thing.__init__(self, "nail", "a nine inch nail.")
         self.depth = 1
 
     def handle_hit(self, hitter):
         if self.depth > 0:
-            print "bang! the nail is hammered."
+            print("bang! the nail is hammered.")
             self.depth -= 1
         else:
-            print "ping! the nail won't go deeper."
+            print("ping! the nail won't go deeper.")
+
 
 class HammerTime(Place):
     def __init__(self):
@@ -38,38 +41,39 @@ class HammerTime(Place):
         self.contents.append(Hammer())
         self.contents.append(Nail())
 
-    @verb('look,l','none','none','none')
+    @verb("look,l", "none", "none", "none")
     def look(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
         if self.contents[1].depth > 0:
-            print "You see a nail sticking out ", self.contents[1].depth, "cm."
+            print("You see a nail sticking out ", self.contents[1].depth, "cm.")
         else:
-            print "You see a nail fully hammered in."
-        print "You see a hammer."
+            print("You see a nail fully hammered in.")
+        print("You see a hammer.")
 
-    @verb('look,l', 'that','none','none')
+    @verb("look,l", "that", "none", "none")
     def look_at(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr, stateobject=None):
         if dobj:
-            print "%s: %s" % (dobj.name, dobj.description)
+            print("%s: %s" % (dobj.name, dobj.description))
         else:
-            print "That doesn't appear to be here."
+            print("That doesn't appear to be here.")
+
 
 hammertime = HammerTime()
-game = Interpreter([], Player(), [hammertime,], hammertime)
+game = Interpreter([], Player(), [hammertime], hammertime)
 run = True
 
-if __name__ == '__main__':
-    while (run):
-        cmd = ''
+if __name__ == "__main__":
+    while run:
+        cmd = ""
         try:
-            cmd = raw_input('>')
+            cmd = input(">")
         except EOFError:
             run = False
-        if cmd.startswith('quit'):
-            run  = False
+        if cmd.startswith("quit"):
+            run = False
         else:
             try:
                 game.interpret(cmd)
             except PyooVerbNotFound:
-                print "I don't understand that."
+                print("I don't understand that.")
 
-    print "Bye!"
+    print("Bye!")
