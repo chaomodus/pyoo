@@ -33,7 +33,7 @@ class PyooObjectNotFound(PyooError):
 
 NORMALIZED_PREPS = tuple([x.split("/") for x in PREPOSITIONS])
 
-VerbCallFrame = namedtuple("VerbCallFrame", "environment,verbname,dobj,dobjstr,prepstr,iobj,iobjstr,argstr")
+VerbCallFrame = namedtuple("VerbCallFrame", "environment,player,verbname,dobj,dobjstr,prepstr,iobj,iobjstr,argstr")
 
 # this simple decorator adds verb metadata to a method or function
 # verbname is a comma-separated list of verb names with possible woldcard

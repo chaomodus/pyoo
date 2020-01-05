@@ -10,7 +10,7 @@ class Interpreter(object):
         self.contents = set(contents)
         for cont in self.contents:
             cont.interpreter = self
-
+        self.content_cache = []
         self.update()
 
     def add_player(self, player_object):
@@ -26,7 +26,10 @@ class Interpreter(object):
         self.update_caches()
 
     def update_caches(self):
+        self.content_cache = []
         for obj in self.contents:
+            for name in obj.names:
+                self.content_cache.append((name, obj))
             try:
                 obj.update_caches()
             except AttributeError:
@@ -39,6 +42,9 @@ class Interpreter(object):
 
     def handle_get(self, thing):
         pass
+
+    def lookup_global_object(self, objstr):
+        return [x for x in self.content_cache if fnmatch.fnmatch(objstr, x[0])]
 
     def lookup_object(self, player, objstr):
         m = None
@@ -75,6 +81,7 @@ class Interpreter(object):
             iobjstr = cmd_comps[3]
         except IndexError:
             pass
+
         try:
             cmdmatches = player.get_command_matches(command)
         except PyooVerbNotFound:
@@ -103,4 +110,4 @@ class Interpreter(object):
             # lookp object
             iobj = self.lookup_object(player, iobjstr)
 
-        return verb(VerbCallFrame(self, verbstr, dobj, dobjstr, prepstr, iobj, iobjstr, argstr))
+        return verb(VerbCallFrame(self, player, verbstr, dobj, dobjstr, prepstr, iobj, iobjstr, argstr))

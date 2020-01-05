@@ -117,7 +117,7 @@ class Place(Container):
     # name either
     @make_verb("#go", "none", "none", "none")
     def go(self, verb_callframe):
-        self.do_go(verb_callframe.verbname)
+        self.do_go(verb_callframe.verbname, verb_callframe)
 
     @make_verb("go,move,walk,run", "any", "none", "none")
     def go_dir(self, verb_callframe):
@@ -125,7 +125,7 @@ class Place(Container):
 
     def do_go(self, direction, verb_callframe):
         if direction in self.ways:
-            verb_callframe.environment.handle_move(self.ways[direction])
+            verb_callframe.environment.handle_move(self.ways[direction],  verb_callframe.player)
 
     def update_go(self):
         # note does no actually remove items from the go verb in case the descender is overloading.

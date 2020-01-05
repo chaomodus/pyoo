@@ -1,14 +1,15 @@
 from pyoo.things import Place, Player
 from pyoo.placeloader import PlaceLoader
 from pyoo.interpret import Interpreter, PyooVerbNotFound
-from pyoo.base import verb
+from pyoo.base import make_verb
 
 class DescriptivePlace(Place):
     def handle_enter(self, player):
+        super().handle_enter(player)
         self.do_look()
 
-    @verb("look,l", "none", "none", "none")
-    def look(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
+    @make_verb("look,l", "none", "none", "none")
+    def look(self, verb_callframe):
         self.do_look()
 
     def do_look(self):
@@ -21,13 +22,15 @@ class DescriptivePlace(Place):
 
 
 loader = PlaceLoader(open("roomtest.txt", "r"), DescriptivePlace)
-game = Interpreter([], Player(), list(loader.places.values()), None)
-porch = game.get_placematches("Porch")[0][1]
+player = Player("player")
+game = Interpreter(list(loader.places.values()))
+porch = game.lookup_global_object("Porch")[0][1]
 run = True
+game.update()
+game.handle_move(porch, player)
 
 # REPL
 if __name__ == "__main__":
-    game.handle_move(porch)
     while run:
         cmd = ""
         try:
@@ -38,7 +41,7 @@ if __name__ == "__main__":
             run = False
         else:
             try:
-                game.interpret(cmd)
+                game.interpret(cmd, player)
             except PyooVerbNotFound:
                 print("I don't understand that.")
 
