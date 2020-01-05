@@ -1,7 +1,7 @@
+import fnmatch
 import itertools
 
-from .base import verb
-
+from .base import make_verb, PyooVerbNotFound, PyooObjectNotFound
 
 class Thing(object):
     def __init__(self, thingname, description="A nondescript object."):
@@ -52,17 +52,57 @@ class Thing(object):
     def handle_move(self, newlocation):
         self.location = newlocation
 
+    def handle_remove(self, oldlocation):
+        self.location = None
+
     def __repr__(self):
         return "<Thing '%s' object at 0x%x>" % (self.name, self.__hash__())
 
-
 class Container(Thing):
     def __init__(self, names, description=""):
-        Thing.__init__(self, names, description)
-        self.contents = list()
+        super().__init__(names, description)
+        self.contents = set()
+        self.name_cache = []
+        self.command_cache = []
+
+    def update_caches(self):
+        self.name_cache = []
+        self.command_cache = []
+        for obj in self.contents:
+            for name in obj.names:
+                self.name_cache.append((name, obj))
+            for verbglob in obj.verb_globs():
+                if verbglob[0][0] == "#":
+                    continue
+                self.command_cache.append(verbglob)
+        for verbglob in self.verb_globs():
+            if verbglob[0][0] == "#":
+                    continue
+            self.command_cache.append(verbglob)
+
+    def get_command_matches(self, command_spec):
+        res = [x for x in self.command_cache if fnmatch.fnmatch(command_spec, x[0])]
+        # sort by ambiguity (percentage of *)
+        res.sort(key=lambda a: a[0].count("*") / float(len(a[0])))
+        if (len(res) < 1):
+            raise PyooVerbNotFound
+        return res
+
+    def get_name_matches(self, name):
+        return [x for x in self.name_cache if fnmatch.fnmatch(name, x[0])]
+
+    def handle_exit(self, oldobj):
+        self.contents.remove(oldobj)
+        oldobj.handle_remove(self)
 
     def handle_enter(self, newobj):
-        pass
+        self.contents.add(newobj)
+        newobj.handle_move(self)
+        try:
+            newobj.update_caches()
+        except AttributeError:
+            pass
+        self.update_caches()
 
     def __repr__(self):
         return "<Container '%s' object at 0x%x>" % (self.name, self.__hash__())
@@ -70,23 +110,22 @@ class Container(Thing):
 
 class Place(Container):
     def __init__(self, names, description=""):
-        Container.__init__(self, names, description)
+        super().__init__(names, description)
         self.ways = dict()
 
     # this verb expects to be annotated from update_go. We never want it ot be at the top of a match list by its deault
     # name either
-    @verb("#go", "none", "none", "none")
-    def go(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
-        self.do_go(verbname)
+    @make_verb("#go", "none", "none", "none")
+    def go(self, verb_callframe):
+        self.do_go(verb_callframe.verbname)
 
-    @verb("go,move,walk,run", "any", "none", "none")
-    def go_dir(self, verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr):
-        self.do_go(dobjstr)
+    @make_verb("go,move,walk,run", "any", "none", "none")
+    def go_dir(self, verb_callframe):
+        self.do_go(verb_callframe.dobjstr, verb_callframe)
 
-    def do_go(self, direction):
-        if self.interpreter:
-            if direction in self.ways:
-                self.interpreter.handle_move(self.ways[direction])
+    def do_go(self, direction, verb_callframe):
+        if direction in self.ways:
+            verb_callframe.environment.handle_move(self.ways[direction])
 
     def update_go(self):
         # note does no actually remove items from the go verb in case the descender is overloading.
@@ -94,15 +133,16 @@ class Place(Container):
         for direction in self.ways:
             if direction not in self.go.names:
                 self.go.names.append(direction)
+        if self.interpreter:
+            self.interpreter.update()
 
     def __repr__(self):
         return "<Place '%s' object at 0x%x>" % (self.name, self.__hash__())
 
 
-class Player(Thing):
-    def __init__(self):
-        Thing.__init__(self, "player")
-        self.inventory = list()
+class Player(Container):
+    def __init__(self, names, description=""):
+        super().__init__(names, description)
 
     def __repr__(self):
         return "<Player '%s' object at 0x%x>" % (self.name, self.__hash__())

@@ -1,4 +1,6 @@
 
+from collections import namedtuple
+
 PREPOSITIONS = (
     "with/using",
     "at/to",
@@ -19,7 +21,19 @@ PREPOSITIONS = (
     "off",
 )
 
+class PyooError(Exception):
+    pass
+
+
+class PyooVerbNotFound(PyooError):
+    pass
+
+class PyooObjectNotFound(PyooError):
+    pass
+
 NORMALIZED_PREPS = tuple([x.split("/") for x in PREPOSITIONS])
+
+VerbCallFrame = namedtuple("VerbCallFrame", "environment,verbname,dobj,dobjstr,prepstr,iobj,iobjstr,argstr")
 
 # this simple decorator adds verb metadata to a method or function
 # verbname is a comma-separated list of verb names with possible woldcard
@@ -27,10 +41,9 @@ NORMALIZED_PREPS = tuple([x.split("/") for x in PREPOSITIONS])
 #   soup, any = any string, none = blank)
 # iobjspec is 'this' or 'that' or 'none' or 'any'
 # prepspec is one of prepositions strings
-# verb prototypes are: (verbname, dobjstr, prepstr, iobjstr, dobj, iobj, argstr)
+# verb prototypes are: (verb_callframe, argstr)
 
-
-def verb(verbname, dobjspec, prepspec, iobjspec):
+def make_verb(verbname, dobjspec, prepspec, iobjspec):
     def verb_decorate(verbfunc):
         names = [x.strip() for x in verbname.split(",")]
         verbfunc.name = names[0]
