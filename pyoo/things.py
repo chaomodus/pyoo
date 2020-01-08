@@ -144,7 +144,7 @@ class Place(Container):
 
     def handle_enter(self, newobj):
         super().handle_enter(newobj)
-        self.tell("{} arrives".format(newobj))
+        self.tell("{} arrives".format(newobj.name))
 
     def update_go(self):
         # note does no actually remove items from the go verb in case the descender is overloading.
