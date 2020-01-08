@@ -62,6 +62,8 @@ class Interpreter(object):
 
     def interpret(self, command, player):
         # FIXME make this better to support mulitple word objstrs and prepstr
+        if not command:
+            return
 
         cmd_comps = command.split()
         verbstr = cmd_comps[0]

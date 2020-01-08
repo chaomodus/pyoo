@@ -4,7 +4,7 @@ import os.path
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = "pyoo"
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 
 srcpath = os.path.dirname(__file__)
 

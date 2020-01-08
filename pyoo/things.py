@@ -12,6 +12,9 @@ class Thing(object):
         self.location = None
         self.interpreter = None
 
+    def tell(self, message):
+        print("<tell stub>", self, message)
+
     def verbs(self):
         """Return a list of bound methods which denote themselves as verbs."""
         verbs = list()
@@ -104,6 +107,13 @@ class Container(Thing):
             pass
         self.update_caches()
 
+    def handle_tell(self, msg, who):
+        for obj in who:
+            obj.tell(msg)
+
+    def tell(self, msg):
+        self.handle_tell(msg, self.contents)
+
     def __repr__(self):
         return "<Container '%s' object at 0x%x>" % (self.name, self.__hash__())
 
@@ -112,6 +122,9 @@ class Place(Container):
     def __init__(self, names, description=""):
         super().__init__(names, description)
         self.ways = dict()
+
+    def tell_only(self, message, verb_callframe):
+        self.handle_tell(message, self.contents - {verb_callframe.player})
 
     # this verb expects to be annotated from update_go. We never want it ot be at the top of a match list by its deault
     # name either
@@ -125,7 +138,13 @@ class Place(Container):
 
     def do_go(self, direction, verb_callframe):
         if direction in self.ways:
+            self.tell_only("{} moves {}".format(verb_callframe.player, direction), verb_callframe)
+            verb_callframe.player.tell("You move {}".format(direction))
             verb_callframe.environment.handle_move(self.ways[direction],  verb_callframe.player)
+
+    def handle_enter(self, newobj):
+        super().handle_enter(newobj)
+        self.tell("{} arrives".format(newobj))
 
     def update_go(self):
         # note does no actually remove items from the go verb in case the descender is overloading.
